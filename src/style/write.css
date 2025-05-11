@@ -1,0 +1,23 @@
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 80px; /* מרווח מעל ה-header */
+    color: gold; /* צבע טקסט זהב */
+}
+
+.hero-title {
+    font-size: 2.5rem; /* גודל טקסט עבור הכותרת */
+    margin-bottom: 10px; /* מרווח מתחת לכותרת */
+}
+
+.hero-description {
+    font-size: 1.25rem; /* גודל טקסט עבור התיאור */
+    max-width: 600px; /* רוחב מקסימלי לתיאור */
+}
+
+
+
+

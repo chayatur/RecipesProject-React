@@ -1,0 +1,82 @@
+.home-container {
+    background-image: url('../images/homeImage.jpg');
+    background-position: center; 
+    background-size: cover; 
+    background-repeat: no-repeat;
+    opacity: 0.8; /* הגברת השקיפות של התמונה */
+}
+
+.container {
+    position: relative;
+    color: gold; /* צבע טקסט זהב */
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 1;
+    padding: 10px 0;
+    background-color: rgba(0, 0, 0, 0.7); /* רקע שקוף בשחור */
+    border-bottom: 2px solid gold; /* קו גבול זהב בתחתית */
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    z-index: 1;
+    padding: 10px 0;
+    background-color: rgba(0, 0, 0, 0.7); /* רקע שקוף בשחור */
+    border-top: 2px solid gold; /* קו גבול זהב בחלק העליון */
+    color: gold; /* צבע טקסט זהב */
+}
+
+.button {
+    margin-right: 2px;
+    border-color: gold; /* גבול זהב */
+    color: gold; /* טקסט זהב */
+    background-color: transparent; /* רקע שקוף */
+    border-radius: 25px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.button:hover {
+    background-color: gold; /* רקע זהב בעת ריחוף */
+    color: black; /* טקסט שחור בעת ריחוף */
+}
+
+.outlet {
+    position: absolute;
+    top: 60px; /* מתחת ל-header */
+    bottom: 40px; /* מעל ל-footer */
+    width: 100%;
+    z-index: 0;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 0; /* לא להוסיף מרווח מעל */
+    color: gold; /* צבע טקסט זהב */
+}
+
+.hero-title {
+    font-size: 2.5rem; /* גודל טקסט עבור הכותרת */
+    margin-bottom: 10px; /* מרווח מתחת לכותרת */
+}
+
+.hero-description {
+    font-size: 1.25rem; /* גודל טקסט עבור התיאור */
+    max-width: 600px; /* רוחב מקסימלי לתיאור */
+}

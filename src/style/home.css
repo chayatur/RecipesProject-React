@@ -1,0 +1,96 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* מונע גלילה */
+}
+
+body {
+    background-image: url('../images/homeImage.jpg');
+    background-position: center; 
+    background-size: cover; 
+    background-repeat: no-repeat;
+    opacity: 0.8; /* הגברת השקיפות של התמונה */
+}
+
+
+.container {
+    position: relative;
+    color: gold; /* צבע טקסט זהב */
+    height: 100vh; /* תוודא שה-container תופס את כל הגובה */
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    color: gold;
+    top: 0;
+    z-index: 1;
+    padding: 10px 0;
+    background-color: rgba(0, 0, 0, 0.7); /* רקע שקוף בשחור */
+    border-bottom: 2px solid gold; /* קו גבול זהב בתחתית */
+}
+
+.button {
+    margin-right: 2px;
+    border-color: gold; /* גבול זהב */
+    color: gold; /* טקסט זהב */
+    background-color: transparent; /* רקע שקוף */
+    border-radius: 25px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.button:hover {
+    background-color: gold; /* רקע זהב בעת ריחוף */
+    color: black; /* טקסט שחור בעת ריחוף */
+}
+
+.outlet {
+    position: absolute;
+    top: 60px; /* מתחת ל-header */
+    bottom: 40px; /* מעל ל-footer */
+    width: 100%;
+    z-index: 0;
+    overflow: auto; /* אם יש תוכן שצריך לגלול */
+}
+.hero-content {
+    display: flex;
+    flex-grow: 1; /* מאפשר לגדול ולתפוס את כל הגובה הפנוי */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: gold; /* צבע טקסט זהב */
+}
+
+.hero-title {
+    /* justify-content: center;
+    align-items: center; */
+  
+    margin-left: 55%;
+    font-size: 2.5rem; /* גודל טקסט עבור הכותרת */
+    margin-bottom: 55%; 
+}
+
+.hero-description {
+    font-size: 1.25rem; /* גודל טקסט עבור התיאור */
+    max-width: 600px; /* רוחב מקסימלי לתיאור */
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0;
+    background-color: rgba(0, 0, 0, 0.7); /* רקע שקוף בשחור */
+    color: gold; /* צבע טקסט זהב */
+    border-top: 2px solid gold; /* קו גבול זהב בחלק העליון */
+    position: fixed;
+    bottom: 0; /* צמוד לתחתית */
+   
+}
