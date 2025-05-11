@@ -1,0 +1,56 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    position: relative; /* שינוי ל-relative כדי למנוע בעיות מיקום */
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.button {
+    width: 100px;
+    padding: 10px;
+    margin: 5px;
+    background-color: #4B0082; /* צבע סגול כהה (אוכמניות) */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #6A0dad; /* צבע סגול בהיר יותר במעבר עכבר */
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 300px; /* הגדרת רוחב קבוע לטופס */
+}
+
+.form input {
+    margin: 5px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form button {
+    padding: 10px;
+    background-color: #8B0000; /* צבע אדום-בורדו (דובדבן) */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.form button:hover {
+    background-color: #A52A2A; /* צבע אדום בהיר יותר במעבר עכבר */
+}
