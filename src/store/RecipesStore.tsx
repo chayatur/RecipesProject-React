@@ -1,4 +1,4 @@
-import { RecipeInputs } from "../components/Object";
+import { RecipeInputs } from "../components/Objects";
 import { makeAutoObservable } from "mobx";
 
 class RecipeStore {

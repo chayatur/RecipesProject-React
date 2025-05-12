@@ -1,16 +1,16 @@
 import axios from "axios";
 import { useContext, useState } from "react";
-import { User } from "../Object";
+import { User } from "../Objects";
 import { userContext } from "../../Context/UserContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CircularProgress, Box, TextField, Button, Typography } from "@mui/material";
+import { CircularProgress, Box, TextField, Button, Typography, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const schema = yup.object().shape({
   UserName: yup.string().required("יש להזין שם משתמש"),
-  Password: yup.string().min(8, "סיסמה חייבת להכיל לפחות 8 תווים").required("יש להזין סיסמה"),
+  Password: yup.string().min(3, "סיסמה חייבת להכיל לפחות3 תווים").required("יש להזין סיסמה"),
   Name: yup.string().required("יש להזין שם מלא"),
   Phone: yup.string().matches(/^\d{10}$/, "מספר טלפון חייב להיות בן 10 ספרות").required("יש להזין טלפון"),
   Email: yup.string().email("כתובת אימייל לא תקינה").required("יש להזין אימייל"),
@@ -21,8 +21,8 @@ const SignIn = () => {
   const { setMyUser } = useContext(userContext);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false); // מצב חדש להסתיר את הטופס
-  
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -34,7 +34,7 @@ const SignIn = () => {
     mode: "onChange",
   });
 
-  const onSend = async (data) => {
+  const onSend = async (data:any) => {
     setLoading(true);
     try {
       const res = await axios.post<User>("http://localhost:8080/api/user/sighin", data, {
@@ -43,8 +43,8 @@ const SignIn = () => {
       setMsg("נרשמת בהצלחה");
       setMyUser(res.data);
       reset();
-      setIsSubmitted(true); // עדכון מצב ההגשה
-    } catch (error) {
+      setIsSubmitted(true);
+    } catch (error:any) {
       if (error.response?.data?.includes("unique")) {
         setError("UserName", { message: "המשתמש או האימייל כבר רשומים במערכת" });
       } else {
@@ -55,12 +55,12 @@ const SignIn = () => {
   };
 
   if (isSubmitted) {
-    return <Typography variant="h5" align="center">נרשמת בהצלחה</Typography>; // הודעה לאחר הרשמה
+    return <Typography variant="h5" align="center">נרשמת בהצלחה</Typography>;
   }
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-      <Box 
+    <Box display="flex" justifyContent="center" alignItems="center" height="100vh" >
+      <Paper 
         component="form" 
         onSubmit={handleSubmit(onSend)} 
         sx={{ 
@@ -71,7 +71,7 @@ const SignIn = () => {
           backgroundColor: 'white' 
         }}
       >
-        <Typography variant="h4" align="center" gutterBottom>הרשמה</Typography>
+        <Typography variant="h4" align="center" color="gold" gutterBottom>הרשמה</Typography>
         {msg && <Typography color="error" variant="body2" align="center">{msg}</Typography>}
         
         <TextField 
@@ -143,7 +143,8 @@ const SignIn = () => {
           sx={{ marginTop: 2 }} 
           disabled={!isValid || loading}
         >
-          {loading ? <CircularProgress size={24} /> : "הרשמה"}
+          {loading ? <CircularProgress size={24} 
+           /> : "הרשמה"}
         </Button>
         
         {errors.UserName?.message === "המשתמש או האימייל כבר רשומים במערכת" && (
@@ -151,7 +152,7 @@ const SignIn = () => {
             לכניסה הקליקו כאן
           </Link>
         )}
-      </Box>
+      </Paper>
     </Box>
   );
 };

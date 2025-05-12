@@ -5,7 +5,9 @@ import axios from "axios";
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import React from "react";
 import KitchenIcon from '@mui/icons-material/Kitchen';
-import { Categories } from "../Object";
+import { Categories } from "../Objects";
+import { Difficulty } from "../Objects";
+
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -41,29 +43,31 @@ const RecipeForm = () => {
     fetchCategories();
   }, []);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data:any) => {
     try {
         const payload = {
             Name: data.name,
             Description: data.description,
-            Difficulty: data.difficulty === 'low' ? 1 : data.difficulty === 'medium' ? 2 : 3,
+            Difficulty: data.difficulty === 'low' ? Difficulty.Low : data.difficulty === 'medium' ? Difficulty.Medium : Difficulty.High,
             Duration: Number(data.duration),
             Img: data.img,
-            UserId: Number(data.userId), // ודא שזה קיים
-            CategoryId: Number(data.categoryId),
-            Ingredients: data.ingredients.map(ingredient => ({
+            UserId:Number(sessionStorage.getItem("userId") ),
+            CategoryId: Number(data.CategoryId), 
+            Ingridents: data.ingredients.map((ingredient:any) => ({ 
                 Name: ingredient.name,
-                Count: Number(ingredient.count),
+                Count: Number(ingredient.count), 
                 Type: ingredient.type,
             })),
-            Instructions: data.instructions,
+            Instructions: data.instructions.map((instruction:any) => ({
+                Name: instruction,
+            })),
         };
 
-        console.log("Payload being sent:", payload); // לוג לפלט
-        const res = await axios.post("http://localhost:8080/api/recipe", payload);
+        console.log("Payload being sent:", payload);
+        const res = await axios.post<any>("http://localhost:8080/api/recipe", payload);
         setSnackbarMessage('המתכון נוסף בהצלחה!');
         setSnackbarSeverity('success');
-    } catch (error) {
+    } catch (error:any) {
         console.error("Error details:", error.response ? error.response.data : error.message);
         setSnackbarMessage('שגיאה בהוספת המתכון. אנא נסה שוב.');
         setSnackbarSeverity('error');
@@ -71,9 +75,6 @@ const RecipeForm = () => {
         setSnackbarOpen(true);
     }
 };
-
-
-  
 
   return (
     <Box sx={{ minHeight: "100vh", opacity: "90%", py: 4 }}>
@@ -89,7 +90,9 @@ const RecipeForm = () => {
               defaultValue=""
               rules={{ required: "שם המתכון הוא שדה חובה." }}
               render={({ field }) => (
-                <TextField label="שם המתכון" required {...field} fullWidth sx={{ mb: 2 }} error={!!errors.name} helperText={errors.name?.message} />
+                <TextField label="שם המתכון" required {...field} fullWidth sx={{ mb: 2 }} error={!!errors.name} 
+                // helperText={errors.name?.message} 
+                />
               )}
             />
             <Controller
@@ -98,7 +101,9 @@ const RecipeForm = () => {
               defaultValue=""
               rules={{ required: "תיאור הוא שדה חובה." }}
               render={({ field }) => (
-                <TextField label="תיאור" required {...field} fullWidth multiline rows={3} sx={{ mb: 2 }} error={!!errors.description} helperText={errors.description?.message} />
+                <TextField label="תיאור" required {...field} fullWidth multiline rows={3} sx={{ mb: 2 }} error={!!errors.description} 
+                // helperText={errors.description?.message} 
+                />
               )}
             />
             <Controller
@@ -122,7 +127,7 @@ const RecipeForm = () => {
               )}
             />
             <Controller
-              name="categoryId"
+              name="CategoryId" 
               control={control}
               defaultValue=""
               rules={{ required: "בחר קטגוריה." }}
@@ -133,7 +138,7 @@ const RecipeForm = () => {
                   fullWidth
                   select
                   size="small"
-                  error={!!errors.categoryId}
+                  error={!!errors.CategoryId} 
                   sx={{ mb: 1 }}
                   required
                 >
@@ -159,6 +164,7 @@ const RecipeForm = () => {
             />
 
             {/* שדות עבור מצרכים */}
+            <Typography variant="h6" sx={{ mt: 4 }}>מצרכים</Typography>
             {ingredientFields.map((item, index) => (
               <Box key={item.id || index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Controller

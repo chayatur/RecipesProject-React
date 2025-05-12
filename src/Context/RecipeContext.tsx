@@ -1,6 +1,6 @@
 import React, { createContext, useState, ReactNode } from 'react';
 import axios from 'axios';
-import { RecipeInputs } from '../components/Object';
+import { RecipeInputs } from '../components/Objects';
 
 // הגדר את סוג הקונטקסט
 interface RecipeContextType {

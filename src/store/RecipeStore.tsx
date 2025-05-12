@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { RecipeInputs } from '../components/Object';
+import { RecipeInputs } from '../components/Objects';
 
 class RecipeStore {
     [x: string]: any;

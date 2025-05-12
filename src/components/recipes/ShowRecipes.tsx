@@ -2,7 +2,7 @@ import type React from "react";
 
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import type { RecipeInputs } from "../Object";
+import type { RecipeInputs } from "../Objects";
 import {
   CircularProgress,
   Card,
@@ -128,7 +128,7 @@ const ShowRecipes = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [filterCategory, setFilterCategory] = useState("");
   const [filterDuration, setFilterDuration] = useState<number | "">("");
-  const [filterDifficulty, setFilterDifficulty] = useState("");
+  const [filterDifficulty, setFilterDifficulty] = useState(0);
   const [filterUserId, setFilterUserId] = useState<number | "">("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [expandedCards, setExpandedCards] = useState<Record<number, boolean>>({});
@@ -229,15 +229,15 @@ const ShowRecipes = () => {
     return categoryMatch && durationMatch && difficultyMatch && userIdMatch;
   });
 
-  const getCategoryName = (categoryid: number | null | undefined) => {
-    if (categoryid === null || categoryid === undefined) return "ללא קטגוריה";
-    const category = categories.find((cat) => cat.Id === categoryid);
+  const getCategoryName = (CategoryId: number | null | undefined) => {
+    if (CategoryId === null || CategoryId === undefined) return "ללא קטגוריה";
+    const category = categories.find((cat) => cat.Id === CategoryId);
     return category ? category.Name : "ללא קטגוריה";
   };
 
-  const getCategoryColor = (categoryid: number | null | undefined) => {
-    if (categoryid === null || categoryid === undefined) return "#999999";
-    return categoryColors[categoryid as keyof typeof categoryColors] || "#999999";
+  const getCategoryColor = (CategoryId: number | null | undefined) => {
+    if (CategoryId === null || CategoryId === undefined) return "#999999";
+    return categoryColors[CategoryId as keyof typeof categoryColors] || "#999999";
   };
 
   return (
@@ -380,7 +380,7 @@ const ShowRecipes = () => {
                   select
                   label="רמת קושי"
                   value={filterDifficulty}
-                  onChange={(e) => setFilterDifficulty(e.target.value)}
+                  onChange={(e:any) => setFilterDifficulty(e.target.value)}
                   fullWidth
                   variant="outlined"
                   color="primary"
@@ -538,7 +538,7 @@ const ShowRecipes = () => {
                               label={recipe.Difficulty}
                               sx={{
                                 bgcolor: alpha(
-                                  difficultyColors[recipe.Difficulty as keyof typeof difficultyColors] || "#777",
+                                  difficultyColors[recipe.Difficulty as unknown as keyof typeof difficultyColors] || "#777",
                                   0.8,
                                 ),
                                 color: "white",
@@ -661,8 +661,8 @@ const ShowRecipes = () => {
                           </Typography>
 
                           <Box sx={{ textAlign: "right", direction: "rtl" }}>
-                            {recipe.Ingredients && recipe.Ingredients.length > 0 ? (
-                              recipe.Ingredients.map((ing, idx) => (
+                            {recipe.Ingridents && recipe.Ingridents.length > 0 ? (
+                              recipe.Ingridents.map((ing, idx) => (
                                 <Chip
                                   key={idx}
                                   label={`${ing.Name} - ${ing.Count} ${ing.Type}`}

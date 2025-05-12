@@ -10,7 +10,7 @@ import { userContext } from "../../Context/UserContext"; // ייבוא הקשר
 // הגדרת הסכימה לאימות
 const schema = yup.object().shape({
     UserName: yup.string().required("יש להזין שם משתמש"),
-    Password: yup.string().min(4 , "סיסמה חייבת להכיל לפחות 4 תווים").required("יש להזין סיסמה"),
+    Password: yup.string().min(3 , "סיסמה חייבת להכיל לפחות 3 תווים").required("יש להזין סיסמה"),
 });
 
 // הגדרת סוגי הנתונים של הטופס
@@ -29,7 +29,12 @@ const Login = () => {
         try {
             const res = await axios.post<any>("http://localhost:8080/api/user/login", data);
             console.log(res.data);
-            setMyUser(res.data); // עדכון המידע על המשתמש
+         
+            setMyUser(res.data); //
+            sessionStorage.setItem('userId', res.data.Id);
+            console.log("userId",sessionStorage.getItem("userId"));
+            
+    
             setLoginSuccess(true);
         } catch (e) {
             console.error(e);
@@ -55,10 +60,10 @@ const Login = () => {
                 borderRadius: '8px', 
                 boxShadow: 2, 
                 margin: 'auto', 
-                marginTop: '100px' 
+                marginTop: '100px', 
             }}>
             <form className="LoginForm" onSubmit={handleSubmit(onSubmit)}>
-                <Typography variant="h4" align="center">התחברות</Typography>
+                <Typography variant="h4" align="center" color="gold">התחברות</Typography>
                
                 <TextField 
                     {...register("UserName")} 
@@ -79,7 +84,7 @@ const Login = () => {
                     helperText={errors.Password?.message} 
                 />
 
-                <Button type="submit" variant="contained" color="primary" disabled={!isValid} fullWidth>
+                <Button type="submit" variant="contained" color="primary" disabled={!isValid} fullWidth >
                     התחבר
                 </Button>
 
@@ -89,6 +94,8 @@ const Login = () => {
             </form>
         </Box>
     );
+
+    
 }
 
 export default Login;

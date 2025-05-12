@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { User } from "../components/Object"; 
+import { User } from "../components/Objects"; 
 
 class UserStore {
     user: User | null;
