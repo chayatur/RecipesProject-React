@@ -1,5 +1,5 @@
-import type React from "react";
 
+import type React from "react";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import type { RecipeInputs } from "../Objects";
@@ -10,10 +10,6 @@ import {
   Typography,
   Grid,
   Button,
-  TextField,
-  MenuItem,
-  Tooltip,
-  Popover,
   Box,
   Divider,
   Chip,
@@ -27,6 +23,7 @@ import {
   CardMedia,
   CardHeader,
   alpha,
+  Tooltip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -38,7 +35,6 @@ import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import KitchenIcon from "@mui/icons-material/Kitchen";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import { userContext } from "../../Context/UserContext";
 
@@ -46,12 +42,12 @@ import { userContext } from "../../Context/UserContext";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#FFD700", 
+      main: "#FFD700",
       light: "#FFE135",
       dark: "#B8860B",
     },
     secondary: {
-      main: "#DAA520", 
+      main: "#DAA520",
       light: "#F0E68C",
       dark: "#8B4513",
     },
@@ -102,9 +98,9 @@ const theme = createTheme({
 
 // Difficulty level colors
 const difficultyColors = {
-  קל: "#FFD700", // Gold for easy
-  בינוני: "#DAA520", // Goldenrod for medium
-  קשה: "#e74c3c", // Red for hard
+  1: "#FFD700", // Gold for easy
+  2: "#DAA520", // Goldenrod for medium
+  3: "#e74c3c", // Red for hard
 };
 
 // Category colors - will be assigned dynamically
@@ -126,13 +122,13 @@ const ShowRecipes = () => {
   const [recipes, setRecipes] = useState<RecipeInputs[]>([]);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterDuration, setFilterDuration] = useState<number | "">("");
-  const [filterDifficulty, setFilterDifficulty] = useState(0);
-  const [filterUserId, setFilterUserId] = useState<number | "">("");
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [expandedCards, setExpandedCards] = useState<Record<number, boolean>>({});
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    fetchCategories();
+    fetchRecipes();
+  }, []);
 
   const navigate = useNavigate();
 
@@ -162,7 +158,7 @@ const ShowRecipes = () => {
   const handleEditRecipe = (id: number, UserId: number, event: React.MouseEvent) => {
     event.stopPropagation();
     if (UserId === myUser?.Id) {
-      navigate(`/EditRecipe/${id}`); // מעבר לעמוד עריכת המתכון
+      navigate(`/EditRecipe/${id}`);
     } else {
       alert("אינך מורשה לערוך את המתכון כי לא אתה הכנסת אותו");
     }
@@ -189,19 +185,6 @@ const ShowRecipes = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-    fetchRecipes();
-  }, []);
-
-  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const toggleCardExpand = (recipeId: number, event: React.MouseEvent) => {
     event.stopPropagation();
     setExpandedCards((prev) => ({
@@ -210,34 +193,15 @@ const ShowRecipes = () => {
     }));
   };
 
-  const open = Boolean(anchorEl);
-
-  const filteredRecipes = recipes.filter((recipe) => {
-    let categoryMatch = true;
-    if (filterCategory) {
-      if (recipe.CategoryId === null || recipe.CategoryId === undefined) {
-        categoryMatch = false;
-      } else {
-        categoryMatch = String(recipe.CategoryId) === String(filterCategory);
-      }
-    }
-
-    const durationMatch = filterDuration !== "" ? recipe.Duration <= filterDuration : true;
-    const difficultyMatch = filterDifficulty ? recipe.Difficulty === filterDifficulty : true;
-    const userIdMatch = filterUserId ? recipe.UserId === filterUserId : true;
-
-    return categoryMatch && durationMatch && difficultyMatch && userIdMatch;
-  });
-
-  const getCategoryName = (CategoryId: number | null | undefined) => {
-    if (CategoryId === null || CategoryId === undefined) return "ללא קטגוריה";
-    const category = categories.find((cat) => cat.Id === CategoryId);
-    return category ? category.Name : "ללא קטגוריה";
+  const getCategoryColor = (Categoryid: number | null | undefined) => {
+    if (Categoryid === null || Categoryid === undefined) return "#999999";
+    return categoryColors[Categoryid as keyof typeof categoryColors] || "#999999";
   };
 
-  const getCategoryColor = (CategoryId: number | null | undefined) => {
-    if (CategoryId === null || CategoryId === undefined) return "#999999";
-    return categoryColors[CategoryId as keyof typeof categoryColors] || "#999999";
+  const getCategoryName = (Categoryid: number | null | undefined) => {
+    if (Categoryid === null || Categoryid === undefined) return "ללא קטגוריה";
+    const category = categories.find((cat) => cat.Id === Categoryid);
+    return category ? category.Name : "ללא קטגוריה";
   };
 
   return (
@@ -265,28 +229,6 @@ const ShowRecipes = () => {
             <RestaurantMenuIcon sx={{ mr: 1, fontSize: 32 }} />
             המתכונים
           </Typography>
-
-          <Tooltip title="בחרו באיזה סוג של מתכון אתם מחפשים, נשמח למקד אתכם יותר" arrow>
-            <Button
-              variant="contained"
-              onClick={handleFilterClick}
-              startIcon={<FilterListIcon />}
-              sx={{
-                backgroundColor: theme.palette.primary.main,
-                color: "white",
-                borderRadius: "30px",
-                padding: "10px 20px",
-                "&:hover": {
-                  backgroundColor: theme.palette.primary.dark,
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 6px 20px rgba(230, 126, 34, 0.4)",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              סינון
-            </Button>
-          </Tooltip>
         </Box>
 
         {loading ? (
@@ -295,141 +237,9 @@ const ShowRecipes = () => {
           </Box>
         ) : (
           <>
-            <Popover
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handleClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              PaperProps={{
-                sx: {
-                  p: 3,
-                  width: 300,
-                  borderRadius: 3,
-                  boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
-                },
-              }}
-            >
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: theme.palette.primary.main }}>
-                סינון מתכונים
-              </Typography>
-              <Box component="form" sx={{ "& .MuiTextField-root": { mb: 2 } }}>
-                <TextField
-                  select
-                  label="קטגוריה"
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  fullWidth
-                  variant="outlined"
-                  color="primary"
-                  InputLabelProps={{
-                    sx: {
-                      transformOrigin: "right",
-                      right: 16,
-                      left: "auto",
-                      position: "absolute",
-                      background: "white",
-                      padding: "0 8px",
-                    },
-                  }}
-                >
-                  <MenuItem value=""> קטגוריות</MenuItem>
-                  {categories.map((category) => (
-                    <MenuItem key={category.Id} value={category.Id}>
-                      <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                        <Box
-                          sx={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: "50%",
-                            bgcolor: getCategoryColor(category.Id),
-                            mr: 1,
-                          }}
-                        />
-                        {category.Name}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  type="number"
-                  label="זמן הכנה מקסימלי (דקות)"
-                  value={filterDuration}
-                  onChange={(e) => setFilterDuration(e.target.value ? Number(e.target.value) : "")}
-                  fullWidth
-                  variant="outlined"
-                  color="primary"
-                  InputLabelProps={{
-                    sx: {
-                      transformOrigin: "right",
-                      right: 16,
-                      left: "auto",
-                      position: "absolute",
-                      background: "white",
-                      padding: "0 8px",
-                    },
-                  }}
-                />
-                <TextField
-                  select
-                  label="רמת קושי"
-                  value={filterDifficulty}
-                  onChange={(e:any) => setFilterDifficulty(e.target.value)}
-                  fullWidth
-                  variant="outlined"
-                  color="primary"
-                  InputLabelProps={{
-                    sx: {
-                      transformOrigin: "right",
-                      right: 16,
-                      left: "auto",
-                      position: "absolute",
-                      background: "white",
-                      padding: "0 8px",
-                    },
-                  }}
-                >
-                  <MenuItem value="">כל הרמות</MenuItem>
-                  <MenuItem value="קל">קל</MenuItem>
-                  <MenuItem value="בינוני">בינוני</MenuItem>
-                  <MenuItem value="קשה">קשה</MenuItem>
-                </TextField>
-                {myUser && (
-                  <TextField
-                    type="number"
-                    label="נוצר על ידי (מזהה משתמש)"
-                    value={filterUserId}
-                    onChange={(e) => setFilterUserId(e.target.value ? Number(e.target.value) : "")}
-                    fullWidth
-                    variant="outlined"
-                    color="primary"
-                    InputLabelProps={{
-                      sx: {
-                        transformOrigin: "right",
-                        right: 16,
-                        left: "auto",
-                        position: "absolute",
-                        background: "white",
-                        padding: "0 8px",
-                      },
-                    }}
-                  />
-                )}
-                <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleClose} color="primary">
-                  החל סינון
-                </Button>
-              </Box>
-            </Popover>
-
-            {filteredRecipes.length > 0 ? (
+            {recipes.length > 0 ? (
               <Grid container spacing={3}>
-                {filteredRecipes.map((recipe) => (
+                {recipes.map((recipe) => (
                   <Grid item xs={12} sm={6} md={4} key={recipe.Id}>
                     <Card
                       sx={{
@@ -452,7 +262,7 @@ const ShowRecipes = () => {
                           right: 0,
                           width: "100%",
                           height: "4px",
-                          bgcolor: getCategoryColor(recipe.CategoryId),
+                          bgcolor: getCategoryColor(recipe.Categoryid),
                           zIndex: 1,
                         }}
                       />
@@ -461,7 +271,7 @@ const ShowRecipes = () => {
                         avatar={
                           <Avatar
                             sx={{
-                              bgcolor: getCategoryColor(recipe.CategoryId),
+                              bgcolor: getCategoryColor(recipe.Categoryid),
                               width: 40,
                               height: 40,
                             }}
@@ -484,11 +294,11 @@ const ShowRecipes = () => {
                         }
                         subheader={
                           <Chip
-                            label={getCategoryName(recipe.CategoryId)}
+                            label={getCategoryName(recipe.Categoryid)}
                             size="small"
                             sx={{
-                              bgcolor: alpha(getCategoryColor(recipe.CategoryId), 0.1),
-                              color: getCategoryColor(recipe.CategoryId),
+                              bgcolor: alpha(getCategoryColor(recipe.Categoryid), 0.1),
+                              color: getCategoryColor(recipe.Categoryid),
                               fontWeight: 500,
                               mt: 0.5,
                             }}
@@ -581,7 +391,7 @@ const ShowRecipes = () => {
 
                               <Tooltip title="ערוך מתכון">
                                 <IconButton
-                                  onClick={(e) => handleEditRecipe(recipe.Id, recipe.UserId, e)} // קריאה לעריכת המתכון
+                                  onClick={(e) => handleEditRecipe(recipe.Id, recipe.UserId, e)}
                                   size="small"
                                   sx={{
                                     color: theme.palette.text.secondary,
@@ -694,7 +504,7 @@ const ShowRecipes = () => {
 
                           <Box sx={{ textAlign: "right", direction: "rtl" }}>
                             {recipe.Instructions && recipe.Instructions.length > 0 ? (
-                              recipe.Instructions.map((instruction, idx) => (
+                              recipe.Instructions.map((instruction: any, idx: any) => (
                                 <Box
                                   key={idx}
                                   sx={{
@@ -741,10 +551,10 @@ const ShowRecipes = () => {
               >
                 <RestaurantMenuIcon sx={{ fontSize: 60, color: alpha(theme.palette.primary.main, 0.3), mb: 2 }} />
                 <Typography variant="h5" color="text.secondary">
-                  אין מתכונים שעונים על קריטריוני הסינון
+                  אין מתכונים זמינים
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  נסו לשנות את הגדרות הסינון או להוסיף מתכונים חדשים
+                  נסו להוסיף מתכונים חדשים
                 </Typography>
               </Box>
             )}

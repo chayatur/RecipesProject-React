@@ -47,7 +47,7 @@ const ShowRecipe = observer(() => {
               <RestaurantIcon sx={{ verticalAlign: "middle", mr: 1 }} /> מוצרים:
             </Typography>
             <List dense>
-              {recipe.Ingredients.map((item, index) => (
+              {recipe.Ingridents.map((item, index) => (
                 <ListItem key={index}>
                   <ListItemText primary={`${item.Name} ${item.Count} ${item.Type}`} />
                 </ListItem>
@@ -61,7 +61,7 @@ const ShowRecipe = observer(() => {
               <MenuBookIcon sx={{ verticalAlign: "middle", mr: 1 }} /> הוראות:
             </Typography>
             <List dense>
-              {recipe.Instructions.map((item, index) => (
+              {recipe.Instructions.map((item:any, index:any) => (
                 <ListItem key={index}>
                   <ListItemText primary={`${index + 1}. ${item}`} /> \
                 </ListItem>

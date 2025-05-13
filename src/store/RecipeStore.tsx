@@ -25,24 +25,24 @@ class RecipeStore {
 
     get recipeDetails() {
         return this.currRecipie ? {
-            name: this.currRecipie.name,
-            description: this.currRecipie.description,
-            difficulty: this.currRecipie.difficulty,
-            duration: this.currRecipie.duration,
-            ingredients: this.currRecipie.ingredients,
-            instructions: this.currRecipie.instructions,
-            image: this.currImage[this.currRecipie.img] || this.currRecipie.img
+            name: this.currRecipie.Name,
+            description: this.currRecipie.Description,
+            difficulty: this.currRecipie.Difficulty,
+            duration: this.currRecipie.Duration,
+            ingredients: this.currRecipie.Ingridents,
+            instructions: this.currRecipie.Instructions,
+            image: this.currImage[this.currRecipie.Img] || this.currRecipie.Img
         } : null;
     }
 
     // פונקציה למחיקת מתכון
     deleteRecipe(recipeId: number) {
-        this.recipes = this.recipes.filter(recipe => recipe.id !== recipeId);
+        this.recipes = this.recipes.filter(recipe => recipe.Id !== recipeId);
     }
 
     // פונקציה לעריכת מתכון
     editRecipe(updatedRecipe: RecipeInputs) {
-        const index = this.recipes.findIndex(recipe => recipe.id === updatedRecipe.id);
+        const index = this.recipes.findIndex(recipe => recipe.Id === updatedRecipe.Id);
         if (index !== -1) {
             this.recipes[index] = updatedRecipe;
         }
@@ -55,7 +55,7 @@ class RecipeStore {
 
     // פונקציה לקבלת מתכון לפי ID
     getRecipeById(recipeId: number) {
-        return this.recipes.find(recipe => recipe.id === recipeId) || null;
+        return this.recipes.find(recipe => recipe.Id === recipeId) || null;
     }
 }
 

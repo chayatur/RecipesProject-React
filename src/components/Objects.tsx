@@ -3,22 +3,22 @@ export type Ingredient = {
     Count: number;
     Type: string;
 }; 
-export enum Difficulty {
-    Low = 1,
-    Medium = 2,
-    High = 3,
-}
+// export enum Difficulty {
+//     Low = 1,
+//     Medium = 2,
+//     High = 3,
+// }
 export type RecipeInputs = {
     Id: number,
     Name: string;
     Description: string;
     UserId: number;
-    CategoryId: number;
+    Categoryid: number;
     Img: string; 
     Duration: number;
     Difficulty: number
     Ingridents : Ingredient[];
-    Instructions:Instruction[];
+    Instructions :[{Name:""}],
 };
 export interface Instruction {
     Name: string;

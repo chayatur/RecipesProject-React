@@ -6,7 +6,7 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import React from "react";
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import { Categories } from "../Objects";
-import { Difficulty } from "../Objects";
+// import { Difficulty } from "../Objects";
 
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
@@ -48,11 +48,11 @@ const RecipeForm = () => {
         const payload = {
             Name: data.name,
             Description: data.description,
-            Difficulty: data.difficulty === 'low' ? Difficulty.Low : data.difficulty === 'medium' ? Difficulty.Medium : Difficulty.High,
+            Difficulty: data.difficulty === 'low' ? 1: data.difficulty === 'medium' ? 2 : 3,
             Duration: Number(data.duration),
             Img: data.img,
             UserId:Number(sessionStorage.getItem("userId") ),
-            CategoryId: Number(data.CategoryId), 
+            Categoryid: Number(data.Categoryid), 
             Ingridents: data.ingredients.map((ingredient:any) => ({ 
                 Name: ingredient.name,
                 Count: Number(ingredient.count), 
@@ -127,7 +127,7 @@ const RecipeForm = () => {
               )}
             />
             <Controller
-              name="CategoryId" 
+              name="Categoryid" 
               control={control}
               defaultValue=""
               rules={{ required: "בחר קטגוריה." }}
@@ -138,7 +138,7 @@ const RecipeForm = () => {
                   fullWidth
                   select
                   size="small"
-                  error={!!errors.CategoryId} 
+                  error={!!errors.Categoryid} 
                   sx={{ mb: 1 }}
                   required
                 >

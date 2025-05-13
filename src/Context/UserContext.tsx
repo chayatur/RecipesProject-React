@@ -26,3 +26,4 @@ const UserContext = ({ children }: { children: ReactElement }) => {
 };
 
 export default UserContext;
+

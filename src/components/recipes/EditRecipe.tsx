@@ -1,232 +1,244 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
-import { observer } from 'mobx-react-lite';
-import { Box, Container, TextField, Button, Typography, Snackbar, Paper, MenuItem } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  CircularProgress,
+  Box,
+  Typography,
+  Container,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+  IconButton,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Snackbar,
+} from "@mui/material";
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import KitchenIcon from '@mui/icons-material/Kitchen';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { Difficulty } from '../Objects';
+
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const EditRecipe = observer(() => {
-  const nav = useNavigate();
+const EditRecipe = () => {
   const { id } = useParams();
-  const { control, handleSubmit, setValue } = useForm();
+  const { control, handleSubmit, reset } = useForm();
   const { fields: ingredientFields, append: addIngredient, remove: removeIngredient } = useFieldArray({
     control,
-    name: "ingredients"
+    name: "Ingridents"
   });
   const { fields: instructionFields, append: addInstruction, remove: removeInstruction } = useFieldArray({
     control,
-    name: "instructions"
+    name: "Instructions"
   });
-  
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
-  const [categories, setCategories] = useState([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRecipe = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/recipe/${id}`);
-        const recipeData = response.data;
-
-        // Set the form values with the fetched data
-        setValue("name", recipeData.Name);
-        setValue("description", recipeData.Description);
-        setValue("difficulty", recipeData.Difficulty);
-        setValue("duration", recipeData.Duration);
-        setValue("CategoryId", recipeData.CategoryId);
-        setValue("img", recipeData.Img);
-        
-        // Set ingredients and instructions
-        recipeData.Ingridents.forEach((ingredient :any)=> {
-          addIngredient({ name: ingredient.Name, count: ingredient.Count, type: ingredient.Type });
-        });
-        recipeData.Instructions.forEach( (instruction:any)=> {
-          addInstruction(instruction.Name);
-        });
-      } catch (error) {
-        console.error("Error fetching recipe:", error);
+        const [recipeRes, categoriesRes] = await Promise.all([
+          axios.get(`http://localhost:8080/api/recipe/${id}`),
+          axios.get("http://localhost:8080/api/category"),
+        ]);
+        reset(recipeRes.data);
+        setCategories(categoriesRes.data);
+      } catch (err) {
+        setError("שגיאה בטעינת הנתונים");
+      } finally {
+        setLoading(false);
       }
     };
+    fetchData();
+  }, [id, reset]);
 
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get("http://localhost:8080/api/category");
-        setCategories(res.data);
-      } catch (error) {
-        console.log("Error fetching categories:", error);
-      }
-    };
+  const onSubmit = async (data) => {
+    const currentUserId = sessionStorage.getItem("userId");
+    const recipeOwnerId = data.UserId;
 
-    fetchRecipe();
-    fetchCategories();
-  }, [id, setValue, addIngredient, addInstruction]);
-
-  const onSubmit = async (data:any) => {
-    try {
-        const payload = {
-            Id: id, // הוספת ה-ID של המתכון
-            Name: data.name,
-            Description: data.description,
-            Difficulty: data.difficulty === 'low' ? 1 : data.difficulty === 'medium' ? 2 : 3,
-            Duration: Number(data.duration),
-            Img: data.img,
-            CategoryId: Number(data.CategoryId), // הוספת קטגוריה
-            Ingredients: data.ingredients.map((ingredient:any) => ({
-                Name: ingredient.name,
-                Count: Number(ingredient.count),
-                Type: ingredient.type,
-            })),
-            Instructions: data.instructions.map((instruction: any) => ({
-                Name: instruction,
-            })),
-        };
-
-        await axios.post(`http://localhost:8080/api/recipe/edit`, payload);
-        setSnackbarMessage('המתכון עודכן בהצלחה!');
-        setSnackbarSeverity('success');
-    } catch (error:any) {
-        console.error("Error details:", error.response ? error.response.data : error.message);
-        setSnackbarMessage('שגיאה בעדכון המתכון. אנא נסה שוב.');
-        setSnackbarSeverity('error');
-    } finally {
-        setSnackbarOpen(true);
-        nav(`/ShowRecipes/ShowRecipe/${data.name}`);
+    if (!recipeOwnerId) {
+      alert("לא ניתן למצוא את בעל המתכון.");
+      return;
     }
-};
 
+    if (String(currentUserId) !== String(recipeOwnerId)) {
+      alert("אין לך הרשאה לערוך את המתכון הזה.");
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:8080/api/recipe/edit`, data);
+      setSnackbarMessage('המתכון נשמר בהצלחה!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      navigate('/');
+    } catch (error) {
+      console.error('Error saving recipe:', error);
+      setSnackbarMessage('שגיאה בשמירת המתכון.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleDelete = async () => {
+    const currentUserId = sessionStorage.getItem("userId");
+    const recipeOwnerId = control._formValues.UserId;
+
+    if (currentUserId != recipeOwnerId) {
+      alert("אין לך הרשאה למחוק את המתכון הזה.");
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:8080/api/recipe/delete/${id}`);
+      alert("המתכון נמחק בהצלחה");
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      setSnackbarMessage('שגיאה במחיקת המתכון.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography color="error" align="center">
+        {error || "לא נמצא מתכון"}
+      </Typography>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: "100vh", opacity: "90%", py: 4 }}>
       <Container maxWidth="lg">
         <Paper elevation={6} sx={{ padding: 4, borderRadius: 2, opacity: "80%", width: "75%", margin: "0 auto" }}>
           <Typography variant="h4" align="center" sx={{ mb: 3, fontWeight: 'bold', color: '#d35400' }}>
-            <KitchenIcon sx={{ mr: 1 }} /> עריכת מתכון
+            עריכת מתכון
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
-              name="name"
+              name="Name"
               control={control}
-              defaultValue=""
               render={({ field }) => (
-                <TextField label="שם המתכון" required {...field} fullWidth sx={{ mb: 2 }} />
+                <TextField label="שם המתכון" {...field} fullWidth variant="outlined" sx={{ mb: 2 }} />
               )}
             />
             <Controller
-              name="description"
+              name="Description"
               control={control}
-              defaultValue=""
               render={({ field }) => (
-                <TextField label="תיאור" required {...field} fullWidth multiline rows={3} sx={{ mb: 2 }} />
+                <TextField label="תיאור" {...field} fullWidth multiline rows={4} variant="outlined" sx={{ mb: 2 }} />
               )}
             />
-            <Controller
-              name="difficulty"
-              control={control}
-              defaultValue="low"
-              render={({ field }) => (
-                <TextField select label="דרגת קושי" required {...field} fullWidth sx={{ mb: 2 }}>
-                  <MenuItem value="low">קל</MenuItem>
-                  <MenuItem value="medium">בינוני</MenuItem>
-                  <MenuItem value="high">קשה</MenuItem>
-                </TextField>
-              )}
-            />
-            <Controller
-              name="duration"
-              control={control}
-              defaultValue={30}
-              render={({ field }) => (
-                <TextField label="משך זמן הכנה (דקות)" type="number" required {...field} fullWidth sx={{ mb: 2 }} inputProps={{ min: 1 }} />
-              )}
-            />
-            <Controller
-              name="CategoryId"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="קטגוריה"
-                  fullWidth
-                  select
-                  sx={{ mb: 1 }}
-                >
-                  {categories && categories.length > 0 ? (
-                    categories.map((item:any) => (
+            <FormControl fullWidth required sx={{ mb: 2 }}>
+              <InputLabel id="Categoryid-label">קטגוריה</InputLabel>
+              <Controller
+                name="Categoryid"
+                control={control}
+                render={({ field }) => (
+                  <Select labelId="Categoryid-label" {...field}>
+                    {categories.map((item) => (
                       <MenuItem key={item.Id} value={item.Id}>{item.Name}</MenuItem>
-                    ))
-                  ) : (
-                    <MenuItem value="">אין קטגוריות זמינות</MenuItem>
-                  )}
-                </TextField>
+                    ))}
+                  </Select>
+                )}
+              />
+            </FormControl>
+            <Controller
+              name="Difficulty"
+              control={control}
+              render={({ field }) => (
+                <TextField label="דרגת קושי" {...field} fullWidth variant="outlined" sx={{ mb: 2 }} />
               )}
             />
             <Controller
-              name="img"
+              name="Duration"
               control={control}
-              defaultValue=""
               render={({ field }) => (
-                <TextField label="URL לתמונה" {...field} fullWidth sx={{ mb: 2 }} />
+                <TextField label="משך זמן הכנה (דקות)" {...field} fullWidth variant="outlined" sx={{ mb: 2 }} />
               )}
             />
-
-            {/* שדות עבור מצרכים */}
             <Typography variant="h6" sx={{ mt: 4 }}>מצרכים</Typography>
             {ingredientFields.map((item, index) => (
-              <Box key={item.id || index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Controller
-                  name={`ingredients.${index}.name`}
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <TextField label="שם מצרך" {...field} fullWidth sx={{ mr: 1 }} />
-                  )}
-                />
-                <Controller
-                  name={`ingredients.${index}.count`}
-                  control={control}
-                  defaultValue={0}
-                  render={({ field }) => (
-                    <TextField label="כמות" type="number" {...field} fullWidth sx={{ mr: 1 }} />
-                  )}
-                />
-                <Controller
-                  name={`ingredients.${index}.type`}
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <TextField label="סוג" {...field} fullWidth sx={{ mr: 1 }} />
-                  )}
-                />
-                <Button variant="outlined" color="error" onClick={() => removeIngredient(index)}>-</Button>
-              </Box>
+              <Paper key={item.id || index} variant="outlined" sx={{ mb: 2, p: 2 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <Controller
+                      name={`Ingridents.${index}.Name`}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField label="שם" {...field} fullWidth variant="outlined" />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Controller
+                      name={`Ingridents.${index}.Count`}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField label="כמות" {...field} fullWidth variant="outlined" />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Controller
+                      name={`Ingridents.${index}.Type`}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField label="סוג" {...field} fullWidth variant="outlined" />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <IconButton onClick={() => removeIngredient(index)} color="error">
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </Paper>
             ))}
-            <Button variant="contained" onClick={() => addIngredient({ name: "", count: 0, type: "" })} sx={{ mb: 2, backgroundColor: '#FFD700', color: '#000' }}>הוסף מצרך</Button>
+            <Button variant="contained" onClick={() => addIngredient({ Name: "", Count: "", Type: "" })} startIcon={<AddIcon />} sx={{ mb: 2, backgroundColor: '#FFD700', color: '#000' }}>הוסף מצרך</Button>
 
             {/* שדות עבור הוראות */}
-            <Typography variant="h6" sx={{ mt: 4 }}>הוראות</Typography>
+            <Typography variant="h6" sx={{ mt: 4 }}>הוראות הכנה</Typography>
             {instructionFields.map((item, index) => (
-              <Box key={item.id || index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box key={item.id || index} display="flex" alignItems="center" gap={2} mb={2}>
                 <Controller
-                  name={`instructions.${index}`}
+                  name={`Instructions.${index}.Name`}
                   control={control}
-                  defaultValue=""
                   render={({ field }) => (
-                    <TextField label={`הוראה ${index + 1}`} {...field} fullWidth />
+                    <TextField label={`הוראה ${index + 1}`} {...field} fullWidth variant="outlined" />
                   )}
                 />
-                <Button variant="outlined" color="error" onClick={() => removeInstruction(index)}>-</Button>
+                <IconButton color="error" onClick={() => removeInstruction(index)}>
+                  <DeleteIcon />
+                </IconButton>
               </Box>
             ))}
-            <Button variant="contained" onClick={() => addInstruction("")} sx={{ mb: 2, backgroundColor: '#FFD700', color: '#000' }}>הוסף הוראה</Button>
+            <Button variant="contained" onClick={() => addInstruction({ Name: "" })} startIcon={<AddIcon />} sx={{ mb: 2, backgroundColor: '#FFD700', color: '#000' }}>הוסף הוראה</Button>
 
-            <Button variant="contained" type="submit" fullWidth sx={{ backgroundColor: '#FFD700', color: '#000' }}>
+            <Button variant="contained" type="submit" fullWidth sx={{ backgroundColor: '#FFD700', color: '#000', mt: 2 }}>
               שמור מתכון
             </Button>
           </form>
@@ -237,7 +249,6 @@ const EditRecipe = observer(() => {
         autoHideDuration={6000} 
         onClose={() => setSnackbarOpen(false)} 
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }} 
-        sx={{ marginTop: '64px' }} 
       >
         <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
           {snackbarMessage}
@@ -245,6 +256,6 @@ const EditRecipe = observer(() => {
       </Snackbar>
     </Box>
   );
-});
+};
 
 export default EditRecipe;
